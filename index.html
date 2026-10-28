@@ -3,638 +3,490 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEON ARENA 3D - Ultimate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON CITY BATTLE 3D</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#050914;color:white;font-family:Arial,sans-serif}
+body{margin:0;overflow:hidden;background:#07101d;color:white;font-family:Arial,sans-serif}
 canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none}
-.panel{position:absolute;top:14px;width:210px;padding:12px;background:#071426e8;border:1px solid #35eaff88;border-radius:10px;box-shadow:0 0 20px #00cfff22}
-#you{left:14px}#cpu{right:14px;text-align:right}
-.label{font-size:11px;letter-spacing:2px;color:#9ed9f5}
-.value{font-size:23px;font-weight:bold;margin:5px 0}
-.bar{height:10px;border-radius:8px;background:#26384c;overflow:hidden}
-.fill{height:100%;width:100%;transition:width .15s}
-#playerHP{background:#37f5bd}#cpuHP{background:#ff5478}
-#cross{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%)}
-#cross:before,#cross:after{content:"";position:absolute;background:#a5ffff;box-shadow:0 0 8px #00eaff}
-#cross:before{width:2px;height:18px;left:8px}
-#cross:after{height:2px;width:18px;top:8px}
-#bottom{position:absolute;bottom:14px;width:100%;text-align:center;font-size:12px;color:white;text-shadow:0 2px 5px black}
-#message{position:absolute;top:20%;width:100%;text-align:center;font-size:21px;font-weight:bold;color:#9ffaff;text-shadow:0 0 15px #00dfff}
-#overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse,#153354f5,#020610f9)}
-#card{width:100%;max-width:520px;padding:25px;border:1px solid #35eaff99;border-radius:18px;background:#071426f7;box-shadow:0 0 60px #00cfff20}
-h1{text-align:center;font-size:clamp(30px,7vw,50px);letter-spacing:3px;color:#9cfaff;margin:0}
-.sub{text-align:center;color:#ff8dc7;letter-spacing:4px;font-size:12px;margin:8px 0 20px}
-p,li{font-size:14px;line-height:1.85;color:#d5e8f6}
-button{display:block;width:100%;padding:14px;border:0;border-radius:8px;background:#6bf2ff;color:#00111d;font-size:17px;font-weight:bold;cursor:pointer;margin-top:18px}
-#result{text-align:center;font-size:23px;font-weight:bold;color:#9ffaff}
-.note{font-size:11px;color:#9ab8d0}
-@media(max-width:500px){.panel{width:43%;padding:9px;top:8px}.value{font-size:18px}#you{left:8px}#cpu{right:8px}}
+#hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:12px;pointer-events:none}
+.panel{background:#081426dd;border:1px solid #4ce9ff88;border-radius:12px;padding:12px 15px;min-width:180px;box-shadow:0 0 15px #00cfff22}
+.name{font-weight:bold;margin-bottom:6px}
+.bar{width:180px;max-width:35vw;height:12px;background:#263449;border-radius:8px;overflow:hidden}
+.fill{height:100%;width:100%;background:#40f5a4;transition:width .15s}
+#cpuFill{background:#ff5f8f}
+#help{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#081426dd;padding:10px 16px;border-radius:10px;text-align:center;font-size:13px;line-height:1.8;pointer-events:none;white-space:nowrap}
+#message{position:fixed;top:24%;left:50%;transform:translateX(-50%);font-size:clamp(20px,4vw,38px);font-weight:bold;text-shadow:0 0 16px #00dfff;pointer-events:none;text-align:center}
+#overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#030817cc;z-index:5}
+.card{width:min(440px,90vw);padding:28px;background:#0b1830f5;border:1px solid #45eaff;border-radius:18px;text-align:center;box-shadow:0 0 45px #00cfff33}
+h1{color:#65f2ff;line-height:1.2}
+button{background:#43e9ff;color:#03101d;border:0;border-radius:10px;padding:13px 24px;font-size:17px;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.15)}
+.small{color:#b6cbe0;font-size:13px;line-height:1.8}
+#stats{margin-top:6px;font-size:13px;color:#b6d7ec}
 </style>
 </head>
 <body>
 <div id="hud">
-  <div id="you" class="panel">
-    <div class="label">PLAYER HP</div>
-    <div class="value" id="playerText">100 / 100</div>
-    <div class="bar"><div id="playerHP" class="fill"></div></div>
-    <div class="label" style="margin-top:10px">CRYSTALS: <span id="playerScore">0</span> / 10</div>
+  <div class="panel">
+    <div class="name">🔵 PLAYER</div>
+    <div class="bar"><div id="playerFill" class="fill"></div></div>
+    <div id="playerHP">HP 100 / 100</div>
+    <div id="playerScore">クリスタル 0 / 10</div>
   </div>
-  <div id="cpu" class="panel">
-    <div class="label">CPU HP</div>
-    <div class="value" id="cpuText">100 / 100</div>
-    <div class="bar"><div id="cpuHP" class="fill"></div></div>
-    <div class="label" style="margin-top:10px">CRYSTALS: <span id="cpuScore">0</span> / 10</div>
+  <div class="panel">
+    <div class="name">🔴 CITY CPU</div>
+    <div class="bar"><div id="cpuFill" class="fill"></div></div>
+    <div id="cpuHP">HP 100 / 100</div>
+    <div id="cpuScore">クリスタル 0 / 10</div>
   </div>
-  <div id="cross"></div>
-  <div id="message"></div>
-  <div id="bottom">WASD 移動 ｜ マウス 視点 ｜ Space ジャンプ ｜ クリック / E タグパルス</div>
 </div>
 
+<div id="message">NEON CITY</div>
+<div id="help">WASD：移動　｜　マウス：視点　｜　Space：ジャンプ<br>クリック / E：タグパルス　｜　クリスタルを集めて10個で勝利</div>
+
 <div id="overlay">
-  <div id="card">
-    <h1>NEON ARENA</h1>
-    <div class="sub">3D CRYSTAL RUSH</div>
-    <p>立体アリーナでCPUと対戦しよう！</p>
-    <ul>
-      <li>タグパルスを当てると相手のHPが減る。</li>
-      <li>CPUもタグパルスで反撃してくる。</li>
-      <li>相手のHPを0にするか、クリスタルを10個集めると勝利！</li>
-    </ul>
-    <p><b>操作方法</b><br>
-    WASD：移動<br>
-    マウス：視点変更<br>
-    Space：ジャンプ<br>
-    クリック または E：タグパルス<br>
-    ESC：一時停止</p>
-    <div id="result"></div>
+  <div class="card">
+    <h1>NEON CITY<br>BATTLE 3D</h1>
+    <p>ネオンが輝く未来都市でCPUと対戦しよう！</p>
+    <p class="small">
+      街を走り回ってクリスタルを集めよう。<br>
+      タグパルスを当てると相手のHPが減るよ。<br>
+      クリスタル10個、または相手のHPを0にすると勝利！
+    </p>
     <button id="start">ゲームスタート</button>
-    <p class="note">PC版Chrome向け。3D表示にはインターネット接続が必要です。</p>
+    <p class="small">PC・Chromebook向け</p>
   </div>
 </div>
 
 <script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x07101e);
-scene.fog = new THREE.Fog(0x07101e, 35, 85);
+scene.background = new THREE.Color(0x081426);
+scene.fog = new THREE.Fog(0x081426, 35, 100);
 
-const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .1, 120);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .1, 200);
 const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.2;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0x9bdfff, 0x20283b, 2));
-const sun = new THREE.DirectionalLight(0xffffff, 2.3);
-sun.position.set(-10,22,12);
+scene.add(new THREE.HemisphereLight(0x9bdcff,0x20253d,2));
+const sun = new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(15,35,10);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024,1024);
-sun.shadow.camera.left = -28;
-sun.shadow.camera.right = 28;
-sun.shadow.camera.top = 28;
-sun.shadow.camera.bottom = -28;
 scene.add(sun);
 
-const material = (color, metalness=0, roughness=.6, emissive=0) =>
-  new THREE.MeshStandardMaterial({
-    color, metalness, roughness, emissive, emissiveIntensity:.8
-  });
-
-const floorMat = material(0x172334,.55,.55);
-const wallMat = material(0x293a50,.65,.35);
-const darkMat = material(0x101d2b,.6,.4);
-const cyanMat = material(0x27eaff,.25,.25,0x00aaff);
-const pinkMat = material(0xff53b5,.25,.25,0xff1888);
-
-const obstacles = [];
-const arenaSolids = [];
-
-function meshBox(x,y,z,w,h,d,mat,collide=true){
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-  m.position.set(x,y,z);
-  m.castShadow = true;
-  m.receiveShadow = true;
-  scene.add(m);
-  if(collide) obstacles.push(m);
-  return m;
-}
-function solidBox(x,y,z,w,h,d,mat){
-  const m = meshBox(x,y,z,w,h,d,mat,true);
-  arenaSolids.push({x,z,w,d,h,top:y+h/2});
-  return m;
-}
-
-// Arena floor and walls
-meshBox(0,-.3,0,46,.6,46,floorMat,false);
-const grid = new THREE.GridHelper(46,46,0x26d9f3,0x233b53);
-grid.position.y=.015;
-scene.add(grid);
-
-solidBox(0,2.2,-23,46,4.4,.6,wallMat);
-solidBox(0,2.2,23,46,4.4,.6,wallMat);
-solidBox(-23,2.2,0,.6,4.4,46,wallMat);
-solidBox(23,2.2,0,.6,4.4,46,wallMat);
-
-meshBox(0,.06,-22.65,42,.09,.08,cyanMat,false);
-meshBox(0,.06,22.65,42,.09,.08,cyanMat,false);
-meshBox(-22.65,.06,0,.08,.09,42,cyanMat,false);
-meshBox(22.65,.06,0,.08,.09,42,cyanMat,false);
-
-// Raised platforms
-const platforms = [
-  {x:-9,z:-7,w:7,d:6,y:3},
-  {x:9,z:-7,w:7,d:6,y:3},
-  {x:-9,z:8,w:7,d:6,y:2.5},
-  {x:9,z:8,w:7,d:6,y:2.5},
-  {x:0,z:0,w:5,d:5,y:4.2}
-];
-
-for(const p of platforms){
-  meshBox(p.x,p.y-.2,p.z,p.w,.4,p.d,darkMat,false);
-  meshBox(p.x,p.y+.025,p.z,p.w+.1,.08,p.d+.1,cyanMat,false);
-  const ph = p.y-.4;
-  for(const dx of [-p.w/2+.3,p.w/2-.3]){
-    for(const dz of [-p.d/2+.3,p.d/2-.3]){
-      meshBox(p.x+dx,ph/2-.05,p.z+dz,.35,ph,.35,wallMat,false);
-    }
-  }
-}
-
-// Steps
-function stairs(x,z,count,width,depth,rise){
-  for(let i=0;i<count;i++){
-    const h=(i+1)*rise;
-    const zz=z+i*depth;
-    solidBox(x,h/2,zz,width,h,depth,wallMat);
-    meshBox(x,h+.02,zz,width,.045,.06,cyanMat,false);
-  }
-}
-stairs(-9,-12,6,3,.85,.48);
-stairs(9,-12,6,3,.85,.48);
-stairs(-9,3,5,3,.85,.5);
-stairs(9,3,5,3,.85,.5);
-
-// Industrial cover blocks
-const coverData = [
-  [-15,-3,3,3,5],[15,3,3,3,5],
-  [-15,11,4,2.6,3],[15,-11,4,2.6,3],
-  [-3,-15,5,3,2.8],[4,15,5,3,2.8],
-  [-4,5,2,2,5],[4,-4,2,2,5]
-];
-for(const [x,z,w,d,h] of coverData){
-  solidBox(x,h/2,z,w,h,d,darkMat);
-  meshBox(x,h+.06,z,w+.08,.12,d+.08,wallMat,false);
-  meshBox(x,h+.13,z,w*.75,.035,.035,pinkMat,false);
-}
-
-// Light pillars
-for(const x of [-19,-11,11,19]){
-  for(const z of [-19,19]){
-    solidBox(x,2.6,z,.22,5.2,.22,wallMat);
-    meshBox(x,5.25,z,.5,.18,.5,cyanMat,false);
-    const lamp = new THREE.PointLight(0x20cfff,15,9);
-    lamp.position.set(x,4.8,z);
-    scene.add(lamp);
-  }
-}
-
-// Characters
-const player = {
-  x:0,z:17,y:0,vy:0,score:0,hp:100,
-  pulseReady:true,pulseCooldown:0
-};
-const cpu = {
-  x:0,z:-17,y:0,score:0,hp:100,
-  pulseCooldown:1,mesh:null
+const mats = {
+ road:new THREE.MeshStandardMaterial({color:0x222b3a,roughness:.9}),
+ sidewalk:new THREE.MeshStandardMaterial({color:0x687789,roughness:.8}),
+ white:new THREE.MeshStandardMaterial({color:0xd8e7f5}),
+ glass:new THREE.MeshStandardMaterial({color:0x173b5c,metalness:.45,roughness:.25}),
+ dark:new THREE.MeshStandardMaterial({color:0x101a2d,metalness:.4,roughness:.5}),
+ blue:new THREE.MeshStandardMaterial({color:0x11dfff,emissive:0x057bba,emissiveIntensity:2}),
+ pink:new THREE.MeshStandardMaterial({color:0xff4fbd,emissive:0xa60069,emissiveIntensity:2}),
+ gold:new THREE.MeshStandardMaterial({color:0xffd65c,emissive:0x997000,emissiveIntensity:1.5}),
+ green:new THREE.MeshStandardMaterial({color:0x37eea3,emissive:0x087a47,emissiveIntensity:1.5})
 };
 
-function makeCPU(){
-  const group = new THREE.Group();
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(.85,1.15,.6),pinkMat
-  );
-  body.position.y=.9;
-  group.add(body);
-
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(.32,16,12),
-    material(0xf4d7e7,.1,.4)
-  );
-  head.position.y=1.72;
-  group.add(head);
-
-  const visor = new THREE.Mesh(
-    new THREE.BoxGeometry(.45,.12,.08),cyanMat
-  );
-  visor.position.set(0,1.76,-.31);
-  group.add(visor);
-
-  group.traverse(o=>{
-    if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
-  });
-  scene.add(group);
-  return group;
-}
-cpu.mesh = makeCPU();
-cpu.mesh.position.set(cpu.x,0,cpu.z);
-
-// Crystal collection
-const crystals = [];
-const crystalPositions = [
-  [-18,0,-16],[18,0,-16],[-18,0,16],[18,0,16],
-  [-9,3.55,-7],[9,3.55,-7],[-9,3.05,8],[9,3.05,8],
-  [0,4.75,0],[-3,0,-8],[3,0,8],[0,0,0],
-  [-13,0,6],[13,0,-6],[0,0,-19],[0,0,19]
-];
-const crystalGeo = new THREE.OctahedronGeometry(.48,0);
-const crystalMat = new THREE.MeshStandardMaterial({
-  color:0x7dfff4,emissive:0x14cfff,
-  emissiveIntensity:2,metalness:.3,roughness:.2
-});
-
-function spawnCrystals(){
-  for(const c of crystals){
-    scene.remove(c.mesh);
-    scene.remove(c.light);
-  }
-  crystals.length=0;
-
-  for(const [x,y,z] of crystalPositions){
-    const mesh = new THREE.Mesh(crystalGeo,crystalMat);
-    mesh.position.set(x,y+1,z);
-    mesh.castShadow=true;
-    scene.add(mesh);
-
-    const light = new THREE.PointLight(0x2fffee,1.8,4);
-    light.position.copy(mesh.position);
-    scene.add(light);
-
-    crystals.push({mesh,light,x,y:y+1,z,taken:false});
-  }
-}
-
-// Movement and collision
-const keys = {};
-let yaw=0,pitch=0;
-let locked=false,running=false,ended=false;
-let lastTime=0;
-let jumpReady=true;
-let playerProjectiles=[],cpuProjectiles=[];
+const solids = [];
+const pickups = [];
+const pulses = [];
+const decorations = [];
+let gameStarted=false, gameOver=false, locked=false;
+let playerHP=100,cpuHP=100,playerScore=0,cpuScore=0;
+let jumpV=0, onGround=true, lastShot=0, cpuLastShot=0;
+const keys={};
 const clock=new THREE.Clock();
 
-function blocked(x,z,r=.4){
-  if(Math.abs(x)>21.3||Math.abs(z)>21.3)return true;
-  return arenaSolids.some(o=>
-    Math.abs(x-o.x)<o.w/2+r &&
-    Math.abs(z-o.z)<o.d/2+r
-  );
+function box(w,h,d,mat,x,y,z,solid=false){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+ m.position.set(x,y,z);
+ m.castShadow=true;m.receiveShadow=true;
+ scene.add(m);
+ if(solid) solids.push({mesh:m,w,h,d});
+ return m;
 }
 
-function highestPlatform(x,z){
-  let h=0;
-  for(const p of platforms){
-    if(Math.abs(x-p.x)<p.w/2-.2 &&
-       Math.abs(z-p.z)<p.d/2-.2){
-      h=Math.max(h,p.y);
-    }
+// 道路・街区
+box(100,.4,100,mats.road,0,-.25,0);
+for(let x=-45;x<=45;x+=10){
+ box(1,.02,100,mats.white,x,.01,0);
+}
+for(let z=-45;z<=45;z+=10){
+ box(100,.02,1,mats.white,0,.012,z);
+}
+
+// 交差点の横断歩道
+for(const z of [-12,12]){
+ for(let i=-5;i<=5;i++){
+  box(.9,.035,5,mats.white,i*1.4,.03,z);
+ }
+}
+for(const x of [-12,12]){
+ for(let i=-5;i<=5;i++){
+  box(5,.035,.9,mats.white,x,.035,i*1.4);
+ }
+}
+
+// 歩道の帯
+for(let z of [-22,22]) box(100,.25,3,mats.sidewalk,0,.05,z);
+for(let x of [-22,22]) box(3,.25,100,mats.sidewalk,x,.05,0);
+
+// 中央の広場
+box(13,.25,13,mats.sidewalk,0,.05,0);
+box(5,.4,5,mats.dark,0,.35,0,true);
+const plazaRing = new THREE.Mesh(
+ new THREE.TorusGeometry(3.5,.09,8,48),
+ mats.blue
+);
+plazaRing.rotation.x=Math.PI/2;
+plazaRing.position.y=.7;
+scene.add(plazaRing);
+
+// ビル用の窓マテリアル
+const windowMats=[
+ new THREE.MeshStandardMaterial({color:0x183957,emissive:0x071f39,emissiveIntensity:1}),
+ new THREE.MeshStandardMaterial({color:0x24496a,emissive:0x102c48,emissiveIntensity:1}),
+ new THREE.MeshStandardMaterial({color:0x4b315f,emissive:0x241039,emissiveIntensity:1})
+];
+
+function makeBuilding(x,z,w,d,h,variant=0){
+ const baseY=h/2;
+ const body=box(w,h,d,windowMats[variant%windowMats.length],x,baseY,z,true);
+ // 屋上の縁取り
+ box(w+.25,.22,d+.25,mats.dark,x,h+.08,z);
+ box(w+.4,.12,.12,variant%2?mats.pink:mats.blue,x,h+.18,z-d/2);
+ box(.12,.12,d+.4,mats.blue,x-w/2,h+.18,z);
+ // 屋上設備
+ box(w*.25,.6,d*.25,mats.dark,x,h+.45,z,true);
+ // 窓の列
+ const rows=Math.min(9,Math.floor(h/2.1));
+ for(let row=0;row<rows;row++){
+  const y=1.1+row*2;
+  for(let col=0;col<Math.max(1,Math.floor(w/1.5));col++){
+   const wx=x-w/2+.75+col*1.5;
+   if(wx<x+w/2-.2 && y<h-.4){
+    const wm=Math.random()<.3?mats.gold:(Math.random()<.5?mats.blue:mats.pink);
+    box(.65,.9,.07,wm,wx,y,z-d/2-.04);
+    box(.07,.9,.65,wm,x+w/2+.04,y,z-d/2+1+col%2);
+   }
   }
-  return h;
+ }
+ // ネオン看板
+ const signMat=variant%2?mats.pink:mats.blue;
+ box(Math.min(w*.8,4),.55,.15,mats.dark,x,h*.55,z-d/2-.12);
+ box(Math.min(w*.72,3.5),.08,.18,signMat,x,h*.55,z-d/2-.22);
+ return body;
 }
 
-function updateHUD(){
-  document.getElementById('playerText').textContent=
-    Math.ceil(player.hp)+' / 100';
-  document.getElementById('cpuText').textContent=
-    Math.ceil(cpu.hp)+' / 100';
-  document.getElementById('playerHP').style.width=
-    player.hp+'%';
-  document.getElementById('cpuHP').style.width=
-    cpu.hp+'%';
-  document.getElementById('playerScore').textContent=player.score;
-  document.getElementById('cpuScore').textContent=cpu.score;
+// 建物は道路の両側に配置。中央通路は広く空ける。
+const buildings=[
+ [-31,-31,8,8,15],[-19,-32,7,8,22],[-35,-18,7,8,19],
+ [-31,31,9,8,24],[-18,33,7,8,14],[-34,19,8,7,18],
+ [31,-31,8,8,23],[19,-33,7,7,16],[34,-18,8,8,20],
+ [31,31,8,8,18],[19,33,7,8,25],[34,19,8,7,15],
+ [-7,-34,7,8,12],[7,-34,7,8,18],[-7,34,7,8,15],[7,34,7,8,21],
+ [-35,0,7,8,17],[35,0,7,8,22]
+];
+buildings.forEach((b,i)=>makeBuilding(...b,i));
+
+// 路地の低い障害物
+const coverPositions=[
+ [-16,-8,3,2,1.5],[16,8,3,2,1.5],
+ [-17,12,2,3,1.8],[17,-12,2,3,1.8],
+ [-7,-18,3,2,1.5],[7,18,3,2,1.5],
+ [-10,5,2,2,1.2],[10,-5,2,2,1.2]
+];
+for(const [x,z,w,d,h] of coverPositions){
+ box(w,h,d,mats.dark,x,h/2,z,true);
+ box(w,.12,.12,mats.blue,x,h+.08,z-d/2);
 }
 
-function endGame(win){
-  if(ended)return;
-  ended=true;
-  running=false;
-  if(document.pointerLockElement)document.exitPointerLock();
-  document.getElementById('overlay').style.display='flex';
-  document.getElementById('result').textContent=
-    win?'YOU WIN! 🏆':'CPU WINS!';
-  document.getElementById('start').textContent='もう一度プレイ';
+// 屋上へ登れる階段・低い台
+function stairs(x,z,dir=1){
+ for(let i=0;i<5;i++){
+  const h=.35*(i+1);
+  const xx=x+(dir===1?i*.8:-i*.8);
+  box(1.2,h,2,mats.sidewalk,xx,h/2,z,true);
+ }
+}
+stairs(-14,-13,1);
+stairs(14,13,-1);
+stairs(-13,14,1);
+stairs(13,-14,-1);
+
+// 街灯
+function streetlight(x,z){
+ box(.15,4,.15,mats.dark,x,2,z,true);
+ box(.9,.12,.3,mats.blue,x,4,z);
+ const light=new THREE.PointLight(0x29dfff,2,9);
+ light.position.set(x,3.8,z);scene.add(light);
+}
+for(let x=-20;x<=20;x+=10){
+ streetlight(x,-20);
+ streetlight(x,20);
+}
+for(let z=-10;z<=10;z+=10){
+ streetlight(-20,z);
+ streetlight(20,z);
 }
 
-function reset(){
-  player.x=0;player.z=17;player.y=0;player.vy=0;
-  player.score=0;player.hp=100;
-  player.pulseReady=true;player.pulseCooldown=0;
+// 公園の植え込み
+function tree(x,z){
+ box(1.8,.65,1.8,mats.dark,x,.32,z);
+ const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18,.25,1.6,7),
+  new THREE.MeshStandardMaterial({color:0x76503c}));
+ trunk.position.set(x,1.2,z);scene.add(trunk);
+ const crown=new THREE.Mesh(new THREE.SphereGeometry(1.1,8,7),
+  new THREE.MeshStandardMaterial({color:0x238c71,roughness:1}));
+ crown.position.set(x,2.2,z);crown.castShadow=true;scene.add(crown);
+}
+for(const [x,z] of [[-5,-5],[-5,5],[5,-5],[5,5]]) tree(x,z);
 
-  cpu.x=0;cpu.z=-17;cpu.y=0;cpu.score=0;cpu.hp=100;
-  cpu.pulseCooldown=1;
-  cpu.mesh.position.set(cpu.x,0,cpu.z);
+// プレイヤーとCPU
+function character(color,glow,x,z){
+ const group=new THREE.Group();
+ const body=new THREE.Mesh(new THREE.CapsuleGeometry(.45,.9,4,8),
+  new THREE.MeshStandardMaterial({color,emissive:glow,emissiveIntensity:.35}));
+ body.position.y=1.05;body.castShadow=true;group.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.32,12,10),
+  new THREE.MeshStandardMaterial({color:0xe0f5ff,emissive:glow,emissiveIntensity:.3}));
+ head.position.y=1.9;head.castShadow=true;group.add(head);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.65,.06,6,24),
+  new THREE.MeshStandardMaterial({color:glow,emissive:glow,emissiveIntensity:2}));
+ ring.rotation.x=Math.PI/2;ring.position.y=.1;group.add(ring);
+ group.position.set(x,0,z);scene.add(group);
+ return group;
+}
+const player=character(0x167dff,0x00cfff,0,5);
+const cpu=character(0xff316b,0xff1760,0,-15);
 
-  for(const s of [...playerProjectiles,...cpuProjectiles]){
-    scene.remove(s.mesh);
+// クリスタル
+function spawnCrystal(x,z){
+ const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.55),
+  new THREE.MeshStandardMaterial({color:0x55ffdb,emissive:0x00cfa3,emissiveIntensity:2,metalness:.3,roughness:.2}));
+ gem.position.set(x,.9,z);gem.castShadow=true;scene.add(gem);
+ pickups.push({mesh:gem,active:true,x,z});
+}
+const crystalSpots=[
+ [-15,-5],[-10,10],[10,10],[15,-5],[0,15],
+ [0,-15],[-18,8],[18,-8],[-8,-18],[8,18],
+ [-20,0],[20,0],[0,20],[0,-20]
+];
+crystalSpots.forEach(p=>spawnCrystal(...p));
+
+// 壁の外に出ないようにする
+function clampPos(obj){
+ obj.position.x=THREE.MathUtils.clamp(obj.position.x,-43,43);
+ obj.position.z=THREE.MathUtils.clamp(obj.position.z,-43,43);
+}
+
+// 円形キャラクターと箱の簡易衝突判定
+function hitsSolid(x,z,r=.55){
+ for(const s of solids){
+  const p=s.mesh.position;
+  if(p.y-s.h/2>1.7) continue;
+  if(Math.abs(x-p.x)<s.w/2+r && Math.abs(z-p.z)<s.d/2+r) return true;
+ }
+ return false;
+}
+function moveWithCollision(obj,dx,dz){
+ const nx=obj.position.x+dx,nz=obj.position.z+dz;
+ if(!hitsSolid(nx,obj.position.z)) obj.position.x=nx;
+ if(!hitsSolid(obj.position.x,nz)) obj.position.z=nz;
+ clampPos(obj);
+}
+
+// タグパルス（ゲーム内の非現実的な光の弾）
+function fire(from,to,isPlayer){
+ const now=performance.now();
+ if(isPlayer && now-lastShot<380)return;
+ if(!isPlayer && now-cpuLastShot<1000)return;
+ if(isPlayer)lastShot=now;else cpuLastShot=now;
+
+ const start=from.position.clone();
+ start.y+=1.25;
+ const target=to.position.clone();target.y+=1.1;
+ const direction=target.sub(start).normalize();
+ const mesh=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),
+  new THREE.MeshBasicMaterial({color:isPlayer?0x50f7ff:0xff4f88}));
+ mesh.position.copy(start);scene.add(mesh);
+ pulses.push({mesh,dir:direction,owner:isPlayer?'player':'cpu',life:0});
+}
+function updatePulses(dt){
+ for(let i=pulses.length-1;i>=0;i--){
+  const p=pulses[i];p.life+=dt;
+  p.mesh.position.addScaledVector(p.dir,dt*25);
+  const target=p.owner==='player'?cpu:player;
+  if(p.mesh.position.distanceTo(new THREE.Vector3(target.position.x,1.1,target.position.z))<1.1){
+   if(p.owner==='player')cpuHP=Math.max(0,cpuHP-25);
+   else playerHP=Math.max(0,playerHP-10);
+   scene.remove(p.mesh);pulses.splice(i,1);continue;
   }
-  playerProjectiles=[];
-  cpuProjectiles=[];
-
-  yaw=0;pitch=0;ended=false;running=true;
-  jumpReady=true;
-  camera.position.set(0,1.7,17);
-  camera.rotation.set(0,0,0);
-  spawnCrystals();
-  updateHUD();
-  document.getElementById('message').textContent='';
+  if(p.life>2.5){scene.remove(p.mesh);pulses.splice(i,1);}
+ }
 }
 
-document.getElementById('start').addEventListener('click',()=>{
-  reset();
-  document.getElementById('overlay').style.display='none';
-  renderer.domElement.requestPointerLock?.();
-});
-
-document.addEventListener('pointerlockchange',()=>{
-  locked=document.pointerLockElement===renderer.domElement;
-  if(!locked&&running&&!ended){
-    document.getElementById('message').textContent=
-      '一時停止中：ゲーム画面をクリックして再開';
-  }else{
-    document.getElementById('message').textContent='';
-  }
-});
-
-renderer.domElement.addEventListener('click',()=>{
-  if(running&&!ended&&!locked){
-    renderer.domElement.requestPointerLock?.();
-  }else if(running&&locked){
-    firePulse(true);
-  }
-});
-
-document.addEventListener('mousemove',e=>{
-  if(!locked||!running||ended)return;
-  yaw-=e.movementX*.0022;
-  pitch-=e.movementY*.002;
-  pitch=THREE.MathUtils.clamp(pitch,-1.2,1.2);
-  camera.rotation.order='YXZ';
-  camera.rotation.set(pitch,yaw,0);
-});
-
+// 操作
 document.addEventListener('keydown',e=>{
-  keys[e.code]=true;
-  if(e.code==='Space')e.preventDefault();
-  if(e.code==='KeyE'&&!e.repeat)firePulse(true);
+ keys[e.code]=true;
+ if(e.code==='Space' && gameStarted && onGround){
+  jumpV=8;onGround=false;
+ }
+ if(e.code==='KeyE' && gameStarted && !gameOver)fire(player,cpu,true);
 });
 document.addEventListener('keyup',e=>keys[e.code]=false);
+document.addEventListener('mousedown',()=>{
+ if(gameStarted && !gameOver && document.pointerLockElement===renderer.domElement)fire(player,cpu,true);
+});
+renderer.domElement.addEventListener('click',()=>{
+ if(gameStarted && !gameOver && document.pointerLockElement!==renderer.domElement)
+  renderer.domElement.requestPointerLock();
+});
+document.addEventListener('pointerlockchange',()=>{
+ locked=document.pointerLockElement===renderer.domElement;
+});
 
-// Non-violent tag-pulse projectiles
-function createPulse(color){
-  const mesh=new THREE.Mesh(
-    new THREE.SphereGeometry(.17,12,10),
-    new THREE.MeshBasicMaterial({color})
-  );
-  scene.add(mesh);
-  return mesh;
+// カメラの向き
+let yaw=0,pitch=0;
+document.addEventListener('mousemove',e=>{
+ if(!locked||!gameStarted||gameOver)return;
+ yaw-=e.movementX*.0025;
+ pitch-=e.movementY*.002;
+ pitch=THREE.MathUtils.clamp(pitch,-1.15,1.15);
+});
+
+// CPUが追いかける
+let cpuMoveTimer=0;
+function updateCPU(dt){
+ const dx=player.position.x-cpu.position.x;
+ const dz=player.position.z-cpu.position.z;
+ const dist=Math.hypot(dx,dz);
+ if(dist>2.8){
+  const speed=dist>12?3.5:2.4;
+  moveWithCollision(cpu,dx/dist*speed*dt,dz/dist*speed*dt);
+ }
+ cpu.rotation.y=Math.atan2(dx,dz);
+ cpuMoveTimer+=dt;
+ if(dist<22 && cpuMoveTimer>1.1){
+  fire(cpu,player,false);cpuMoveTimer=0;
+ }
 }
 
-function firePulse(isPlayer){
-  if(!running||ended)return;
-
-  if(isPlayer){
-    if(!locked||!player.pulseReady)return;
-    player.pulseReady=false;
-    player.pulseCooldown=.42;
-
-    const dir=new THREE.Vector3();
-    camera.getWorldDirection(dir);
-    const mesh=createPulse(0x42f5ff);
-    mesh.position.copy(camera.position).addScaledVector(dir,.8);
-    playerProjectiles.push({
-      mesh,dir:dir.clone(),life:2.4,owner:'player'
-    });
-  }else{
-    const origin=new THREE.Vector3(cpu.x,cpu.y+1.2,cpu.z);
-    const target=camera.position.clone();
-    target.x+=(Math.random()-.5)*.3;
-    target.y+=(Math.random()-.5)*.3;
-    target.z+=(Math.random()-.5)*.3;
-    const dir=target.sub(origin).normalize();
-    const mesh=createPulse(0xff4c9a);
-    mesh.position.copy(origin);
-    cpuProjectiles.push({
-      mesh,dir,life:3,owner:'cpu'
-    });
-  }
+// UI
+function updateHUD(){
+ document.getElementById('playerFill').style.width=playerHP+'%';
+ document.getElementById('cpuFill').style.width=cpuHP+'%';
+ document.getElementById('playerHP').textContent=`HP ${playerHP} / 100`;
+ document.getElementById('cpuHP').textContent=`HP ${cpuHP} / 100`;
+ document.getElementById('playerScore').textContent=`クリスタル ${playerScore} / 10`;
+ document.getElementById('cpuScore').textContent=`クリスタル ${cpuScore} / 10`;
+}
+function endGame(winner){
+ gameOver=true;
+ document.exitPointerLock?.();
+ document.getElementById('overlay').style.display='flex';
+ document.querySelector('#overlay h1').innerHTML=winner==='player'?'YOU WIN! 🏆':winner==='cpu'?'CPU WIN':'DRAW';
+ document.querySelector('#overlay .card p').textContent=
+  winner==='player'?'都市のバトルに勝利した！':winner==='cpu'?'もう一度挑戦しよう！':'引き分け！';
+ document.getElementById('start').textContent='もう一度プレイ';
+}
+function checkEnd(){
+ if(playerHP<=0)endGame('cpu');
+ else if(cpuHP<=0)endGame('player');
+ else if(playerScore>=10 && cpuScore>=10)endGame('draw');
+ else if(playerScore>=10)endGame('player');
+ else if(cpuScore>=10)endGame('cpu');
 }
 
-const raycaster=new THREE.Raycaster();
-function updateProjectiles(list,dt,isPlayer){
-  for(let i=list.length-1;i>=0;i--){
-    const s=list[i];
-    const old=s.mesh.position.clone();
-    const step=s.dir.clone().multiplyScalar(20*dt);
-    s.mesh.position.add(step);
-    s.life-=dt;
-
-    const p=s.mesh.position;
-    let hit=false;
-
-    // Cover blocks stop pulses.
-    raycaster.set(old,step.clone().normalize());
-    raycaster.far=step.length()+.1;
-    if(raycaster.intersectObjects(obstacles,false).length){
-      hit=true;
-    }
-
-    if(!hit&&isPlayer){
-      if(Math.hypot(p.x-cpu.x,p.z-cpu.z)<.85&&
-         p.y>cpu.y+.2&&p.y<cpu.y+2.2){
-        cpu.hp=Math.max(0,cpu.hp-25);
-        hit=true;
-        document.getElementById('message').textContent='CPU HIT!';
-        if(cpu.hp<=0){
-          updateHUD();endGame(true);
-        }
-      }
-    }else if(!hit&&!isPlayer){
-      if(Math.hypot(p.x-player.x,p.z-player.z)<.7&&
-         p.y>player.y+.3&&p.y<player.y+2.4){
-        player.hp=Math.max(0,player.hp-10);
-        hit=true;
-        document.getElementById('message').textContent='TAGGED!';
-        if(player.hp<=0){
-          updateHUD();endGame(false);
-        }
-      }
-    }
-
-    if(s.life<=0||Math.abs(p.x)>23||Math.abs(p.z)>23||hit){
-      scene.remove(s.mesh);
-      list.splice(i,1);
-    }
-  }
-}
-
-function movePlayer(dt){
-  if(!locked)return;
-
-  let f=0,s=0;
-  if(keys.KeyW)f++;
-  if(keys.KeyS)f--;
-  if(keys.KeyD)s++;
-  if(keys.KeyA)s--;
-
-  const len=Math.hypot(f,s)||1;
-  f/=len;s/=len;
-
-  const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*7.5*dt;
-  const dz=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*7.5*dt;
-
-  if(!blocked(player.x+dx,player.z))player.x+=dx;
-  if(!blocked(player.x,player.z+dz))player.z+=dz;
-
-  if(keys.Space&&player.y<=.01&&jumpReady){
-    player.vy=8.5;
-    jumpReady=false;
-  }
-  if(!keys.Space)jumpReady=true;
-
-  const oldY=player.y;
-  player.vy-=20*dt;
-  player.y+=player.vy*dt;
-
-  const floorY=highestPlatform(player.x,player.z);
-  if(player.vy<=0&&oldY>=floorY&&player.y<=floorY){
-    player.y=floorY;
-    player.vy=0;
-  }
-  if(player.y<0){player.y=0;player.vy=0;}
-
-  camera.position.set(player.x,player.y+1.7,player.z);
-}
-
-let cpuTarget=null;
-function findCrystalTarget(){
-  let best=null,dist=Infinity;
-  for(const c of crystals){
-    if(c.taken)continue;
-    const d=Math.hypot(c.x-cpu.x,c.z-cpu.z);
-    if(d<dist){dist=d;best=c;}
-  }
-  return best;
-}
-
-function moveCPU(dt){
-  cpuTarget=findCrystalTarget();
-  const playerDist=Math.hypot(player.x-cpu.x,player.z-cpu.z);
-
-  // The CPU approaches the player when nearby;
-  // otherwise it seeks crystals.
-  let tx,tz;
-  if(playerDist<10){
-    tx=player.x;tz=player.z;
-  }else if(cpuTarget){
-    tx=cpuTarget.x;tz=cpuTarget.z;
-  }else{
-    tx=0;tz=0;
-  }
-
-  const dx=tx-cpu.x,dz=tz-cpu.z;
-  const dist=Math.hypot(dx,dz)||1;
-  const speed=playerDist<10?2.5:3.2;
-  const ux=dx/dist,uz=dz/dist;
-  const nx=cpu.x+ux*speed*dt;
-  const nz=cpu.z+uz*speed*dt;
-
-  if(!blocked(nx,cpu.z,.5))cpu.x=nx;
-  if(!blocked(cpu.x,nz,.5))cpu.z=nz;
-
-  cpu.mesh.position.set(cpu.x,cpu.y,cpu.z);
-  cpu.mesh.rotation.y=Math.atan2(ux,uz);
-
-  cpu.pulseCooldown-=dt;
-  if(playerDist<18&&cpu.pulseCooldown<=0){
-    // CPU sends a harmless tagging pulse toward the player.
-    firePulse(false);
-    cpu.pulseCooldown=1.15;
-  }
-}
-
-function collectCrystals(){
-  for(const c of crystals){
-    if(c.taken)continue;
-
-    const pd=Math.hypot(player.x-c.x,player.z-c.z);
-    if(pd<1.15&&Math.abs(player.y-c.y)<3.4){
-      c.taken=true;c.mesh.visible=false;c.light.visible=false;
-      player.score++;
-      updateHUD();
-      if(player.score>=10){endGame(true);return;}
-    }
-
-    const cd=Math.hypot(cpu.x-c.x,cpu.z-c.z);
-    if(!c.taken&&cd<1.2&&Math.abs(cpu.y-c.y)<3.4){
-      c.taken=true;c.mesh.visible=false;c.light.visible=false;
-      cpu.score++;
-      updateHUD();
-      if(cpu.score>=10){endGame(false);return;}
-    }
-  }
-}
-
+// メインループ
 function animate(){
-  requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),.04);
-  const now=performance.now();
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.04);
+ const t=performance.now()*.001;
 
-  if(running&&!ended){
-    movePlayer(dt);
-    moveCPU(dt);
-    collectCrystals();
+ for(const p of pickups){
+  if(p.active){
+   p.mesh.rotation.y+=dt*1.5;
+   p.mesh.position.y=.9+Math.sin(t*2+p.x)*.18;
+  }
+ }
+ plazaRing.rotation.z+=dt*.2;
 
-    player.pulseCooldown-=dt;
-    if(player.pulseCooldown<=0)player.pulseReady=true;
+ if(gameStarted&&!gameOver){
+  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+  const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+  let dx=0,dz=0;
+  if(keys.KeyW||keys.ArrowUp){dx+=forward.x;dz+=forward.z;}
+  if(keys.KeyS||keys.ArrowDown){dx-=forward.x;dz-=forward.z;}
+  if(keys.KeyD||keys.ArrowRight){dx+=right.x;dz+=right.z;}
+  if(keys.KeyA||keys.ArrowLeft){dx-=right.x;dz-=right.z;}
+  const len=Math.hypot(dx,dz);
+  if(len>0)moveWithCollision(player,dx/len*8*dt,dz/len*8*dt);
 
-    updateProjectiles(playerProjectiles,dt,true);
-    updateProjectiles(cpuProjectiles,dt,false);
-    updateHUD();
-
-    if(player.y>1){
-      document.getElementById('message').textContent='HIGH GROUND';
-    }else if(document.getElementById('message').textContent==='HIGH GROUND'){
-      document.getElementById('message').textContent='';
-    }
+  // ジャンプ
+  if(!onGround){
+   player.position.y+=jumpV*dt;
+   jumpV-=20*dt;
+   if(player.position.y<=0){player.position.y=0;jumpV=0;onGround=true;}
   }
 
-  for(const c of crystals){
-    if(c.taken)continue;
-    c.mesh.rotation.y+=dt*1.3;
-    c.mesh.rotation.x+=dt*.5;
-    c.mesh.position.y=c.y+Math.sin(now*.002+c.x)*.16;
-    c.light.position.copy(c.mesh.position);
-  }
+  player.rotation.y=yaw;
+  updateCPU(dt);
+  updatePulses(dt);
 
-  renderer.render(scene,camera);
+  for(const p of pickups){
+   if(!p.active)continue;
+   if(Math.hypot(player.position.x-p.x,player.position.z-p.z)<1.5){
+    p.active=false;scene.remove(p.mesh);playerScore++;
+   }else if(Math.hypot(cpu.position.x-p.x,cpu.position.z-p.z)<1.5){
+    p.active=false;scene.remove(p.mesh);cpuScore++;
+   }
+  }
+  updateHUD();checkEnd();
+ }
+
+ // 一人称カメラ
+ camera.position.set(player.position.x,player.position.y+1.55,player.position.z);
+ camera.rotation.order='YXZ';
+ camera.rotation.y=yaw;
+ camera.rotation.x=pitch;
+
+ // CPUの位置を見失いにくいように上部マーカーを表示
+ renderer.render(scene,camera);
 }
 animate();
 
+document.getElementById('start').addEventListener('click',()=>{
+ if(gameOver){
+  location.reload();
+  return;
+ }
+ gameStarted=true;
+ document.getElementById('overlay').style.display='none';
+ document.getElementById('message').textContent='FIGHT!';
+ renderer.domElement.requestPointerLock?.();
+ setTimeout(()=>{
+  const msg=document.getElementById('message');
+  if(msg.textContent==='FIGHT!')msg.textContent='';
+ },1800);
+});
+
 addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
 });
 </script>
+</body>
+</html>
+
 </body>
 </html>
 

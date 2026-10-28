@@ -3,68 +3,75 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NEON ARENA 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON ARENA 3D - Ultimate</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#050914;color:white;font-family:Arial,sans-serif}
 canvas{display:block}
 #hud{position:fixed;inset:0;pointer-events:none}
-.panel{position:absolute;top:14px;padding:12px 16px;background:#071426dd;border:1px solid #39dfff88;border-radius:10px;min-width:155px;box-shadow:0 0 20px #00cfff20}
+.panel{position:absolute;top:14px;width:210px;padding:12px;background:#071426e8;border:1px solid #35eaff88;border-radius:10px;box-shadow:0 0 20px #00cfff22}
 #you{left:14px}#cpu{right:14px;text-align:right}
 .label{font-size:11px;letter-spacing:2px;color:#9ed9f5}
-.score{font-size:25px;font-weight:bold;margin-top:4px}
-#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px}
-#cross:before,#cross:after{content:"";position:absolute;background:#9ffaff;box-shadow:0 0 8px #00dfff}
+.value{font-size:23px;font-weight:bold;margin:5px 0}
+.bar{height:10px;border-radius:8px;background:#26384c;overflow:hidden}
+.fill{height:100%;width:100%;transition:width .15s}
+#playerHP{background:#37f5bd}#cpuHP{background:#ff5478}
+#cross{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%)}
+#cross:before,#cross:after{content:"";position:absolute;background:#a5ffff;box-shadow:0 0 8px #00eaff}
 #cross:before{width:2px;height:18px;left:8px}
 #cross:after{height:2px;width:18px;top:8px}
-#bottom{position:absolute;bottom:14px;left:0;width:100%;text-align:center;font-size:12px;color:#c9e9ff;text-shadow:0 2px 4px black}
-#message{position:absolute;top:18%;left:0;width:100%;text-align:center;font-size:18px;color:#a7faff;text-shadow:0 0 12px #00dfff}
-#overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse,#122c4aF5,#02050df8)}
-#card{max-width:540px;width:100%;padding:26px;border:1px solid #39dfff99;border-radius:18px;background:#071426f5;box-shadow:0 0 60px #00cfff25}
-h1{text-align:center;font-size:clamp(30px,7vw,52px);letter-spacing:3px;color:#9cfaff;margin:0}
-.sub{text-align:center;color:#ff9bca;letter-spacing:4px;font-size:12px;margin:8px 0 22px}
-p,li{font-size:14px;line-height:1.9;color:#d6e8f6}
-button{display:block;width:100%;padding:14px;border:0;border-radius:8px;background:#6bf2ff;color:#00111d;font-size:17px;font-weight:bold;cursor:pointer;margin-top:20px}
-button:hover{background:white}
-#result{text-align:center;font-size:22px;color:#8ffaff;font-weight:bold}
+#bottom{position:absolute;bottom:14px;width:100%;text-align:center;font-size:12px;color:white;text-shadow:0 2px 5px black}
+#message{position:absolute;top:20%;width:100%;text-align:center;font-size:21px;font-weight:bold;color:#9ffaff;text-shadow:0 0 15px #00dfff}
+#overlay{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse,#153354f5,#020610f9)}
+#card{width:100%;max-width:520px;padding:25px;border:1px solid #35eaff99;border-radius:18px;background:#071426f7;box-shadow:0 0 60px #00cfff20}
+h1{text-align:center;font-size:clamp(30px,7vw,50px);letter-spacing:3px;color:#9cfaff;margin:0}
+.sub{text-align:center;color:#ff8dc7;letter-spacing:4px;font-size:12px;margin:8px 0 20px}
+p,li{font-size:14px;line-height:1.85;color:#d5e8f6}
+button{display:block;width:100%;padding:14px;border:0;border-radius:8px;background:#6bf2ff;color:#00111d;font-size:17px;font-weight:bold;cursor:pointer;margin-top:18px}
+#result{text-align:center;font-size:23px;font-weight:bold;color:#9ffaff}
+.note{font-size:11px;color:#9ab8d0}
+@media(max-width:500px){.panel{width:43%;padding:9px;top:8px}.value{font-size:18px}#you{left:8px}#cpu{right:8px}}
 </style>
 </head>
 <body>
 <div id="hud">
   <div id="you" class="panel">
-    <div class="label">YOUR CRYSTALS</div>
-    <div id="ps" class="score">0 / 10</div>
+    <div class="label">PLAYER HP</div>
+    <div class="value" id="playerText">100 / 100</div>
+    <div class="bar"><div id="playerHP" class="fill"></div></div>
+    <div class="label" style="margin-top:10px">CRYSTALS: <span id="playerScore">0</span> / 10</div>
   </div>
   <div id="cpu" class="panel">
-    <div class="label">CPU CRYSTALS</div>
-    <div id="cs" class="score">0 / 10</div>
+    <div class="label">CPU HP</div>
+    <div class="value" id="cpuText">100 / 100</div>
+    <div class="bar"><div id="cpuHP" class="fill"></div></div>
+    <div class="label" style="margin-top:10px">CRYSTALS: <span id="cpuScore">0</span> / 10</div>
   </div>
   <div id="cross"></div>
   <div id="message"></div>
-  <div id="bottom">WASD 移動　｜　マウス 視点　｜　Space ジャンプ　｜　ESC 一時停止</div>
+  <div id="bottom">WASD 移動 ｜ マウス 視点 ｜ Space ジャンプ ｜ クリック / E タグパルス</div>
 </div>
 
 <div id="overlay">
   <div id="card">
     <h1>NEON ARENA</h1>
     <div class="sub">3D CRYSTAL RUSH</div>
-    <p>
-      立体アリーナでCPUとクリスタルを取り合おう！<br>
-      先に10個集めた側の勝利。高い足場や障害物を活用しよう。
-    </p>
-    <p>
-      <b>操作方法</b><br>
-      W / A / S / D：移動<br>
-      マウス：視点を動かす<br>
-      Space：ジャンプ<br>
-      ESC：一時停止
-    </p>
+    <p>立体アリーナでCPUと対戦しよう！</p>
+    <ul>
+      <li>タグパルスを当てると相手のHPが減る。</li>
+      <li>CPUもタグパルスで反撃してくる。</li>
+      <li>相手のHPを0にするか、クリスタルを10個集めると勝利！</li>
+    </ul>
+    <p><b>操作方法</b><br>
+    WASD：移動<br>
+    マウス：視点変更<br>
+    Space：ジャンプ<br>
+    クリック または E：タグパルス<br>
+    ESC：一時停止</p>
     <div id="result"></div>
     <button id="start">ゲームスタート</button>
-    <p style="font-size:11px;color:#94b4ce">
-      PC版Chrome向け。起動時にマウス操作を許可してね。
-    </p>
+    <p class="note">PC版Chrome向け。3D表示にはインターネット接続が必要です。</p>
   </div>
 </div>
 
@@ -72,393 +79,563 @@ button:hover{background:white}
 import * as THREE from
 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x07101e);
-scene.fog=new THREE.Fog(0x07101e,32,85);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x07101e);
+scene.fog = new THREE.Fog(0x07101e, 35, 85);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,120);
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.15;
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .1, 120);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0x9bdfff,0x20283b,2));
-const sun=new THREE.DirectionalLight(0xffffff,2.2);
+scene.add(new THREE.HemisphereLight(0x9bdfff, 0x20283b, 2));
+const sun = new THREE.DirectionalLight(0xffffff, 2.3);
 sun.position.set(-10,22,12);
-sun.castShadow=true;
+sun.castShadow = true;
 sun.shadow.mapSize.set(1024,1024);
-sun.shadow.camera.left=-27;
-sun.shadow.camera.right=27;
-sun.shadow.camera.top=27;
-sun.shadow.camera.bottom=-27;
+sun.shadow.camera.left = -28;
+sun.shadow.camera.right = 28;
+sun.shadow.camera.top = 28;
+sun.shadow.camera.bottom = -28;
 scene.add(sun);
 
-const mat=(color,metalness=0,roughness=.7,emissive=0)=>{
- return new THREE.MeshStandardMaterial({color,metalness,roughness,emissive,emissiveIntensity:.8});
-};
-const floorMat=mat(0x172334,.5,.6);
-const wallMat=mat(0x293a50,.65,.35);
-const darkMat=mat(0x101d2b,.65,.4);
-const cyanMat=mat(0x27eaff,.3,.25,0x00aaff);
-const pinkMat=mat(0xff53b5,.3,.25,0xff1888);
+const material = (color, metalness=0, roughness=.6, emissive=0) =>
+  new THREE.MeshStandardMaterial({
+    color, metalness, roughness, emissive, emissiveIntensity:.8
+  });
 
-function addMesh(geo,material,x,y,z,shadow=true){
- const m=new THREE.Mesh(geo,material);
- m.position.set(x,y,z);
- m.castShadow=shadow;
- m.receiveShadow=true;
- scene.add(m);
- return m;
+const floorMat = material(0x172334,.55,.55);
+const wallMat = material(0x293a50,.65,.35);
+const darkMat = material(0x101d2b,.6,.4);
+const cyanMat = material(0x27eaff,.25,.25,0x00aaff);
+const pinkMat = material(0xff53b5,.25,.25,0xff1888);
+
+const obstacles = [];
+const arenaSolids = [];
+
+function meshBox(x,y,z,w,h,d,mat,collide=true){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(x,y,z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  scene.add(m);
+  if(collide) obstacles.push(m);
+  return m;
 }
-function block(x,y,z,w,h,d,material=wallMat){
- return addMesh(new THREE.BoxGeometry(w,h,d),material,x,y,z);
+function solidBox(x,y,z,w,h,d,mat){
+  const m = meshBox(x,y,z,w,h,d,mat,true);
+  arenaSolids.push({x,z,w,d,h,top:y+h/2});
+  return m;
 }
 
-// Floor and metallic grid
-block(0,-.3,0,46,.6,46,floorMat);
-const grid=new THREE.GridHelper(46,46,0x26d9f3,0x233b53);
+// Arena floor and walls
+meshBox(0,-.3,0,46,.6,46,floorMat,false);
+const grid = new THREE.GridHelper(46,46,0x26d9f3,0x233b53);
 grid.position.y=.015;
 scene.add(grid);
 
-// Outer walls
-block(0,2.2,-23,46,4.4,.6,wallMat);
-block(0,2.2,23,46,4.4,.6,wallMat);
-block(-23,2.2,0,.6,4.4,46,wallMat);
-block(23,2.2,0,.6,4.4,46,wallMat);
+solidBox(0,2.2,-23,46,4.4,.6,wallMat);
+solidBox(0,2.2,23,46,4.4,.6,wallMat);
+solidBox(-23,2.2,0,.6,4.4,46,wallMat);
+solidBox(23,2.2,0,.6,4.4,46,wallMat);
 
-function neonLine(x,y,z,w,h,d,material=cyanMat){
- return block(x,y,z,w,h,d,material);
-}
-neonLine(0,.06,-22.65,42,.09,.08);
-neonLine(0,.06,22.65,42,.09,.08);
-neonLine(-22.65,.06,0,.08,.09,42);
-neonLine(22.65,.06,0,.08,.09,42);
+meshBox(0,.06,-22.65,42,.09,.08,cyanMat,false);
+meshBox(0,.06,22.65,42,.09,.08,cyanMat,false);
+meshBox(-22.65,.06,0,.08,.09,42,cyanMat,false);
+meshBox(22.65,.06,0,.08,.09,42,cyanMat,false);
 
-// Multi-level platforms and support pillars
-const platforms=[
- {x:-9,z:-7,w:7,d:6,y:3},
- {x:9,z:-7,w:7,d:6,y:3},
- {x:-9,z:8,w:7,d:6,y:2.5},
- {x:9,z:8,w:7,d:6,y:2.5},
- {x:0,z:0,w:5,d:5,y:4.2}
+// Raised platforms
+const platforms = [
+  {x:-9,z:-7,w:7,d:6,y:3},
+  {x:9,z:-7,w:7,d:6,y:3},
+  {x:-9,z:8,w:7,d:6,y:2.5},
+  {x:9,z:8,w:7,d:6,y:2.5},
+  {x:0,z:0,w:5,d:5,y:4.2}
 ];
+
 for(const p of platforms){
- block(p.x,p.y-.2,p.z,p.w,.4,p.d,darkMat);
- block(p.x,p.y+.025,p.z,p.w+.1,.08,p.d+.1,cyanMat);
- const pillarH=p.y-.4;
- for(const dx of [-p.w/2+.3,p.w/2-.3]){
-  for(const dz of [-p.d/2+.3,p.d/2-.3]){
-   block(p.x+dx,pillarH/2-.05,p.z+dz,.35,pillarH,.35,wallMat);
+  meshBox(p.x,p.y-.2,p.z,p.w,.4,p.d,darkMat,false);
+  meshBox(p.x,p.y+.025,p.z,p.w+.1,.08,p.d+.1,cyanMat,false);
+  const ph = p.y-.4;
+  for(const dx of [-p.w/2+.3,p.w/2-.3]){
+    for(const dz of [-p.d/2+.3,p.d/2-.3]){
+      meshBox(p.x+dx,ph/2-.05,p.z+dz,.35,ph,.35,wallMat,false);
+    }
   }
- }
 }
 
-// Stairs leading to raised platforms
-function stairs(x,z,count,stepW,depth,rise,dir=1){
- for(let i=0;i<count;i++){
-  const h=(i+1)*rise;
-  const zz=z+dir*i*depth;
-  block(x,h/2,zz,stepW,h,depth,wallMat);
-  neonLine(x,h+.02,zz,stepW,.045,.06,cyanMat);
- }
+// Steps
+function stairs(x,z,count,width,depth,rise){
+  for(let i=0;i<count;i++){
+    const h=(i+1)*rise;
+    const zz=z+i*depth;
+    solidBox(x,h/2,zz,width,h,depth,wallMat);
+    meshBox(x,h+.02,zz,width,.045,.06,cyanMat,false);
+  }
 }
-stairs(-9,-12,6,3,.85,.48,1);
-stairs(9,-12,6,3,.85,.48,1);
-stairs(-9,3,5,3,.85,.5,1);
-stairs(9,3,5,3,.85,.5,1);
+stairs(-9,-12,6,3,.85,.48);
+stairs(9,-12,6,3,.85,.48);
+stairs(-9,3,5,3,.85,.5);
+stairs(9,3,5,3,.85,.5);
 
-// Tall cover and industrial containers
-const coverData=[
- [-15,-3,3,3,5],[15,3,3,3,5],
- [-15,11,4,2.6,3],[15,-11,4,2.6,3],
- [-3,-15,5,3,2.8],[4,15,5,3,2.8],
- [-4,5,2,2,5],[4,-4,2,2,5]
+// Industrial cover blocks
+const coverData = [
+  [-15,-3,3,3,5],[15,3,3,3,5],
+  [-15,11,4,2.6,3],[15,-11,4,2.6,3],
+  [-3,-15,5,3,2.8],[4,15,5,3,2.8],
+  [-4,5,2,2,5],[4,-4,2,2,5]
 ];
 for(const [x,z,w,d,h] of coverData){
- block(x,h/2,z,w,h,d,darkMat);
- block(x,h+.06,z,w+.08,.12,d+.08,wallMat);
- neonLine(x,h+.13,z,w*.75,.035,.035,pinkMat);
- for(const s of [-1,1]){
-  block(x+s*(w/2-.12),h/2,z,.08,h-.2,d,wallMat);
- }
+  solidBox(x,h/2,z,w,h,d,darkMat);
+  meshBox(x,h+.06,z,w+.08,.12,d+.08,wallMat,false);
+  meshBox(x,h+.13,z,w*.75,.035,.035,pinkMat,false);
 }
 
-// Tall decorative lights
+// Light pillars
 for(const x of [-19,-11,11,19]){
- for(const z of [-19,19]){
-  block(x,2.6,z,.22,5.2,.22,wallMat);
-  block(x,5.25,z,.5,.18,.5,cyanMat);
-  const lamp=new THREE.PointLight(0x20cfff,18,9);
-  lamp.position.set(x,4.8,z);
-  scene.add(lamp);
- }
+  for(const z of [-19,19]){
+    solidBox(x,2.6,z,.22,5.2,.22,wallMat);
+    meshBox(x,5.25,z,.5,.18,.5,cyanMat,false);
+    const lamp = new THREE.PointLight(0x20cfff,15,9);
+    lamp.position.set(x,4.8,z);
+    scene.add(lamp);
+  }
 }
 
-// Small floating metallic decorations
-for(let i=0;i<14;i++){
- const x=Math.sin(i*12.3)*20;
- const z=Math.cos(i*8.1)*20;
- const geo=new THREE.OctahedronGeometry(.25,0);
- const crystal=addMesh(geo,i%2?cyanMat:pinkMat,x,2+Math.abs(Math.sin(i))*3,z,false);
- crystal.userData.decor=true;
-}
+// Characters
+const player = {
+  x:0,z:17,y:0,vy:0,score:0,hp:100,
+  pulseReady:true,pulseCooldown:0
+};
+const cpu = {
+  x:0,z:-17,y:0,score:0,hp:100,
+  pulseCooldown:1,mesh:null
+};
 
-// Player and CPU
-const player={x:0,z:17,y:0,vy:0,score:0};
-const cpu={x:0,z:-17,y:0,score:0,mesh:null};
+function makeCPU(){
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(.85,1.15,.6),pinkMat
+  );
+  body.position.y=.9;
+  group.add(body);
 
-function makeBot(){
- const g=new THREE.Group();
- const body=addMesh(new THREE.BoxGeometry(.85,1.15,.6),pinkMat,0,.9,0);
- const head=addMesh(new THREE.SphereGeometry(.32,16,12),mat(0xf4d7e7,.1,.4),0,1.72,0);
- const visor=addMesh(new THREE.BoxGeometry(.45,.12,.08),cyanMat,0,1.76,-.29,false);
- g.add(body,head,visor);
- // addMesh adds to scene, so detach the pieces into the bot group
- for(const m of [body,head,visor])scene.remove(m);
- g.add(body,head,visor);
- scene.add(g);
- return g;
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(.32,16,12),
+    material(0xf4d7e7,.1,.4)
+  );
+  head.position.y=1.72;
+  group.add(head);
+
+  const visor = new THREE.Mesh(
+    new THREE.BoxGeometry(.45,.12,.08),cyanMat
+  );
+  visor.position.set(0,1.76,-.31);
+  group.add(visor);
+
+  group.traverse(o=>{
+    if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}
+  });
+  scene.add(group);
+  return group;
 }
-cpu.mesh=makeBot();
+cpu.mesh = makeCPU();
 cpu.mesh.position.set(cpu.x,0,cpu.z);
 
 // Crystal collection
-const crystals=[];
-const crystalGeo=new THREE.OctahedronGeometry(.48,0);
-const crystalMat=new THREE.MeshStandardMaterial({
- color:0x7dfff4,emissive:0x14cfff,emissiveIntensity:2,
- metalness:.3,roughness:.2
-});
-const crystalPositions=[
- [-18,0,-16],[18,0,-16],[-18,0,16],[18,0,16],
- [-9,3.55,-7],[9,3.55,-7],[-9,3.05,8],[9,3.05,8],
- [0,4.75,0],[-3,0,-8],[3,0,8],[0,0,0],
- [-13,0,6],[13,0,-6],[0,0,-19],[0,0,19]
+const crystals = [];
+const crystalPositions = [
+  [-18,0,-16],[18,0,-16],[-18,0,16],[18,0,16],
+  [-9,3.55,-7],[9,3.55,-7],[-9,3.05,8],[9,3.05,8],
+  [0,4.75,0],[-3,0,-8],[3,0,8],[0,0,0],
+  [-13,0,6],[13,0,-6],[0,0,-19],[0,0,19]
 ];
+const crystalGeo = new THREE.OctahedronGeometry(.48,0);
+const crystalMat = new THREE.MeshStandardMaterial({
+  color:0x7dfff4,emissive:0x14cfff,
+  emissiveIntensity:2,metalness:.3,roughness:.2
+});
+
 function spawnCrystals(){
- for(const c of crystals)scene.remove(c.mesh);
- crystals.length=0;
- for(const [x,y,z] of crystalPositions){
-  const mesh=new THREE.Mesh(crystalGeo,crystalMat);
-  mesh.position.set(x,y+1,z);
-  mesh.castShadow=true;
-  scene.add(mesh);
-  const light=new THREE.PointLight(0x2fffee,1.8,4);
-  light.position.copy(mesh.position);
-  scene.add(light);
-  crystals.push({mesh,light,x,y:y+1,z,taken:false});
- }
-}
-spawnCrystals();
-
-// Collision helpers
-const solidRects=[];
-for(const [x,z,w,d,h] of coverData){
- solidRects.push({x,z,w,d,h,top:h});
-}
-for(const p of platforms){
- solidRects.push({x:p.x,z:p.z,w:p.w,d:p.d,h:p.y,top:p.y});
-}
-function blocked(x,z,r=.45){
- if(Math.abs(x)>21.5||Math.abs(z)>21.5)return true;
- return solidRects.some(o=>
-  Math.abs(x-o.x)<o.w/2+r && Math.abs(z-o.z)<o.d/2+r
- );
-}
-function nearestOpen(x,z){
- if(!blocked(x,z))return {x,z};
- const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
- for(let r=.5;r<5;r+=.5){
-  for(const [dx,dz] of dirs){
-   const nx=x+dx*r,nz=z+dz*r;
-   if(!blocked(nx,nz))return {x:nx,z:nz};
+  for(const c of crystals){
+    scene.remove(c.mesh);
+    scene.remove(c.light);
   }
- }
- return {x:0,z:0};
+  crystals.length=0;
+
+  for(const [x,y,z] of crystalPositions){
+    const mesh = new THREE.Mesh(crystalGeo,crystalMat);
+    mesh.position.set(x,y+1,z);
+    mesh.castShadow=true;
+    scene.add(mesh);
+
+    const light = new THREE.PointLight(0x2fffee,1.8,4);
+    light.position.copy(mesh.position);
+    scene.add(light);
+
+    crystals.push({mesh,light,x,y:y+1,z,taken:false});
+  }
 }
 
-// Controls
-const keys={};
-let yaw=0,pitch=0,locked=false,running=false,ended=false;
-let lastTime=0,elapsed=0;
-const speed=7.5;
+// Movement and collision
+const keys = {};
+let yaw=0,pitch=0;
+let locked=false,running=false,ended=false;
+let lastTime=0;
 let jumpReady=true;
+let playerProjectiles=[],cpuProjectiles=[];
+const clock=new THREE.Clock();
+
+function blocked(x,z,r=.4){
+  if(Math.abs(x)>21.3||Math.abs(z)>21.3)return true;
+  return arenaSolids.some(o=>
+    Math.abs(x-o.x)<o.w/2+r &&
+    Math.abs(z-o.z)<o.d/2+r
+  );
+}
+
+function highestPlatform(x,z){
+  let h=0;
+  for(const p of platforms){
+    if(Math.abs(x-p.x)<p.w/2-.2 &&
+       Math.abs(z-p.z)<p.d/2-.2){
+      h=Math.max(h,p.y);
+    }
+  }
+  return h;
+}
 
 function updateHUD(){
- document.getElementById('ps').textContent=player.score+' / 10';
- document.getElementById('cs').textContent=cpu.score+' / 10';
+  document.getElementById('playerText').textContent=
+    Math.ceil(player.hp)+' / 100';
+  document.getElementById('cpuText').textContent=
+    Math.ceil(cpu.hp)+' / 100';
+  document.getElementById('playerHP').style.width=
+    player.hp+'%';
+  document.getElementById('cpuHP').style.width=
+    cpu.hp+'%';
+  document.getElementById('playerScore').textContent=player.score;
+  document.getElementById('cpuScore').textContent=cpu.score;
 }
+
 function endGame(win){
- if(ended)return;
- ended=true;running=false;
- document.exitPointerLock?.();
- document.getElementById('overlay').style.display='flex';
- document.getElementById('result').textContent=win?'YOU WIN! 🏆':'CPU WINS!';
- document.getElementById('start').textContent='もう一度プレイ';
+  if(ended)return;
+  ended=true;
+  running=false;
+  if(document.pointerLockElement)document.exitPointerLock();
+  document.getElementById('overlay').style.display='flex';
+  document.getElementById('result').textContent=
+    win?'YOU WIN! 🏆':'CPU WINS!';
+  document.getElementById('start').textContent='もう一度プレイ';
 }
+
 function reset(){
- player.x=0;player.z=17;player.y=0;player.vy=0;player.score=0;
- cpu.x=0;cpu.z=-17;cpu.y=0;cpu.score=0;
- cpu.mesh.position.set(0,0,-17);
- yaw=0;pitch=0;elapsed=0;ended=false;running=true;
- jumpReady=true;
- spawnCrystals();
- camera.position.set(player.x,1.7,player.z);
- camera.rotation.set(0,0,0);
- updateHUD();
+  player.x=0;player.z=17;player.y=0;player.vy=0;
+  player.score=0;player.hp=100;
+  player.pulseReady=true;player.pulseCooldown=0;
+
+  cpu.x=0;cpu.z=-17;cpu.y=0;cpu.score=0;cpu.hp=100;
+  cpu.pulseCooldown=1;
+  cpu.mesh.position.set(cpu.x,0,cpu.z);
+
+  for(const s of [...playerProjectiles,...cpuProjectiles]){
+    scene.remove(s.mesh);
+  }
+  playerProjectiles=[];
+  cpuProjectiles=[];
+
+  yaw=0;pitch=0;ended=false;running=true;
+  jumpReady=true;
+  camera.position.set(0,1.7,17);
+  camera.rotation.set(0,0,0);
+  spawnCrystals();
+  updateHUD();
+  document.getElementById('message').textContent='';
 }
-document.getElementById('start').onclick=()=>{
- reset();
- document.getElementById('overlay').style.display='none';
- renderer.domElement.requestPointerLock?.();
-};
+
+document.getElementById('start').addEventListener('click',()=>{
+  reset();
+  document.getElementById('overlay').style.display='none';
+  renderer.domElement.requestPointerLock?.();
+});
+
 document.addEventListener('pointerlockchange',()=>{
- locked=document.pointerLockElement===renderer.domElement;
- if(!locked&&running&&!ended){
-  document.getElementById('message').textContent='一時停止中：画面をクリックして再開';
- }else document.getElementById('message').textContent='';
+  locked=document.pointerLockElement===renderer.domElement;
+  if(!locked&&running&&!ended){
+    document.getElementById('message').textContent=
+      '一時停止中：ゲーム画面をクリックして再開';
+  }else{
+    document.getElementById('message').textContent='';
+  }
 });
+
 renderer.domElement.addEventListener('click',()=>{
- if(running&&!ended&&!locked)renderer.domElement.requestPointerLock?.();
+  if(running&&!ended&&!locked){
+    renderer.domElement.requestPointerLock?.();
+  }else if(running&&locked){
+    firePulse(true);
+  }
 });
+
 document.addEventListener('mousemove',e=>{
- if(!locked||!running)return;
- yaw-=e.movementX*.0022;
- pitch-=e.movementY*.002;
- pitch=THREE.MathUtils.clamp(pitch,-1.2,1.2);
- camera.rotation.order='YXZ';
- camera.rotation.set(pitch,yaw,0);
+  if(!locked||!running||ended)return;
+  yaw-=e.movementX*.0022;
+  pitch-=e.movementY*.002;
+  pitch=THREE.MathUtils.clamp(pitch,-1.2,1.2);
+  camera.rotation.order='YXZ';
+  camera.rotation.set(pitch,yaw,0);
 });
+
 document.addEventListener('keydown',e=>{
- keys[e.code]=true;
- if(e.code==='Space')e.preventDefault();
+  keys[e.code]=true;
+  if(e.code==='Space')e.preventDefault();
+  if(e.code==='KeyE'&&!e.repeat)firePulse(true);
 });
 document.addEventListener('keyup',e=>keys[e.code]=false);
 
-// Simple jump and platform landing
-function highestPlatform(x,z,currentY){
- let highest=0;
- for(const p of platforms){
-  if(Math.abs(x-p.x)<p.w/2-.15&&Math.abs(z-p.z)<p.d/2-.15){
-   if(p.y<=currentY+.18)highest=Math.max(highest,p.y);
+// Non-violent tag-pulse projectiles
+function createPulse(color){
+  const mesh=new THREE.Mesh(
+    new THREE.SphereGeometry(.17,12,10),
+    new THREE.MeshBasicMaterial({color})
+  );
+  scene.add(mesh);
+  return mesh;
+}
+
+function firePulse(isPlayer){
+  if(!running||ended)return;
+
+  if(isPlayer){
+    if(!locked||!player.pulseReady)return;
+    player.pulseReady=false;
+    player.pulseCooldown=.42;
+
+    const dir=new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const mesh=createPulse(0x42f5ff);
+    mesh.position.copy(camera.position).addScaledVector(dir,.8);
+    playerProjectiles.push({
+      mesh,dir:dir.clone(),life:2.4,owner:'player'
+    });
+  }else{
+    const origin=new THREE.Vector3(cpu.x,cpu.y+1.2,cpu.z);
+    const target=camera.position.clone();
+    target.x+=(Math.random()-.5)*.3;
+    target.y+=(Math.random()-.5)*.3;
+    target.z+=(Math.random()-.5)*.3;
+    const dir=target.sub(origin).normalize();
+    const mesh=createPulse(0xff4c9a);
+    mesh.position.copy(origin);
+    cpuProjectiles.push({
+      mesh,dir,life:3,owner:'cpu'
+    });
   }
- }
- return highest;
 }
+
+const raycaster=new THREE.Raycaster();
+function updateProjectiles(list,dt,isPlayer){
+  for(let i=list.length-1;i>=0;i--){
+    const s=list[i];
+    const old=s.mesh.position.clone();
+    const step=s.dir.clone().multiplyScalar(20*dt);
+    s.mesh.position.add(step);
+    s.life-=dt;
+
+    const p=s.mesh.position;
+    let hit=false;
+
+    // Cover blocks stop pulses.
+    raycaster.set(old,step.clone().normalize());
+    raycaster.far=step.length()+.1;
+    if(raycaster.intersectObjects(obstacles,false).length){
+      hit=true;
+    }
+
+    if(!hit&&isPlayer){
+      if(Math.hypot(p.x-cpu.x,p.z-cpu.z)<.85&&
+         p.y>cpu.y+.2&&p.y<cpu.y+2.2){
+        cpu.hp=Math.max(0,cpu.hp-25);
+        hit=true;
+        document.getElementById('message').textContent='CPU HIT!';
+        if(cpu.hp<=0){
+          updateHUD();endGame(true);
+        }
+      }
+    }else if(!hit&&!isPlayer){
+      if(Math.hypot(p.x-player.x,p.z-player.z)<.7&&
+         p.y>player.y+.3&&p.y<player.y+2.4){
+        player.hp=Math.max(0,player.hp-10);
+        hit=true;
+        document.getElementById('message').textContent='TAGGED!';
+        if(player.hp<=0){
+          updateHUD();endGame(false);
+        }
+      }
+    }
+
+    if(s.life<=0||Math.abs(p.x)>23||Math.abs(p.z)>23||hit){
+      scene.remove(s.mesh);
+      list.splice(i,1);
+    }
+  }
+}
+
 function movePlayer(dt){
- if(!locked)return;
- let f=0,s=0;
- if(keys.KeyW)f++;
- if(keys.KeyS)f--;
- if(keys.KeyD)s++;
- if(keys.KeyA)s--;
- const len=Math.hypot(f,s)||1;f/=len;s/=len;
- const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*speed*dt;
- const dz=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*speed*dt;
- const nx=player.x+dx,nz=player.z+dz;
- if(!blocked(nx,player.z))player.x=nx;
- if(!blocked(player.x,nz))player.z=nz;
+  if(!locked)return;
 
- if(keys.Space&&player.y<=.01&&jumpReady){
-  player.vy=8.5;jumpReady=false;
- }
- if(!keys.Space)jumpReady=true;
+  let f=0,s=0;
+  if(keys.KeyW)f++;
+  if(keys.KeyS)f--;
+  if(keys.KeyD)s++;
+  if(keys.KeyA)s--;
 
- const oldY=player.y;
- player.vy-=20*dt;
- player.y+=player.vy*dt;
- const floorY=highestPlatform(player.x,player.z,oldY+.2);
- if(player.y<=floorY){
-  player.y=floorY;player.vy=0;
- }
- if(player.y<0){player.y=0;player.vy=0}
- camera.position.set(player.x,player.y+1.7,player.z);
+  const len=Math.hypot(f,s)||1;
+  f/=len;s/=len;
+
+  const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*7.5*dt;
+  const dz=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*7.5*dt;
+
+  if(!blocked(player.x+dx,player.z))player.x+=dx;
+  if(!blocked(player.x,player.z+dz))player.z+=dz;
+
+  if(keys.Space&&player.y<=.01&&jumpReady){
+    player.vy=8.5;
+    jumpReady=false;
+  }
+  if(!keys.Space)jumpReady=true;
+
+  const oldY=player.y;
+  player.vy-=20*dt;
+  player.y+=player.vy*dt;
+
+  const floorY=highestPlatform(player.x,player.z);
+  if(player.vy<=0&&oldY>=floorY&&player.y<=floorY){
+    player.y=floorY;
+    player.vy=0;
+  }
+  if(player.y<0){player.y=0;player.vy=0;}
+
+  camera.position.set(player.x,player.y+1.7,player.z);
 }
 
-// CPU seeks nearest available crystal, walking around obstacles
 let cpuTarget=null;
 function findCrystalTarget(){
- let best=null,dist=Infinity;
- for(const c of crystals){
-  if(c.taken)continue;
-  const d=Math.hypot(c.x-cpu.x,c.z-cpu.z);
-  if(d<dist){dist=d;best=c}
- }
- return best;
+  let best=null,dist=Infinity;
+  for(const c of crystals){
+    if(c.taken)continue;
+    const d=Math.hypot(c.x-cpu.x,c.z-cpu.z);
+    if(d<dist){dist=d;best=c;}
+  }
+  return best;
 }
+
 function moveCPU(dt){
- cpuTarget=findCrystalTarget();
- if(!cpuTarget)return;
- let dx=cpuTarget.x-cpu.x,dz=cpuTarget.z-cpu.z;
- const dist=Math.hypot(dx,dz)||1;
- dx/=dist;dz/=dist;
- const v=3.2;
- let nx=cpu.x+dx*v*dt,nz=cpu.z+dz*v*dt;
- if(blocked(nx,cpu.z,.5)){
-  nx=cpu.x+(-dz)*v*dt;
- }
- if(blocked(cpu.x,nz,.5)){
-  nz=cpu.z+(dx)*v*dt;
- }
- if(!blocked(nx,cpu.z,.5))cpu.x=nx;
- if(!blocked(cpu.x,nz,.5))cpu.z=nz;
- cpu.mesh.position.set(cpu.x,0,cpu.z);
- cpu.mesh.rotation.y=Math.atan2(dx,dz);
+  cpuTarget=findCrystalTarget();
+  const playerDist=Math.hypot(player.x-cpu.x,player.z-cpu.z);
+
+  // The CPU approaches the player when nearby;
+  // otherwise it seeks crystals.
+  let tx,tz;
+  if(playerDist<10){
+    tx=player.x;tz=player.z;
+  }else if(cpuTarget){
+    tx=cpuTarget.x;tz=cpuTarget.z;
+  }else{
+    tx=0;tz=0;
+  }
+
+  const dx=tx-cpu.x,dz=tz-cpu.z;
+  const dist=Math.hypot(dx,dz)||1;
+  const speed=playerDist<10?2.5:3.2;
+  const ux=dx/dist,uz=dz/dist;
+  const nx=cpu.x+ux*speed*dt;
+  const nz=cpu.z+uz*speed*dt;
+
+  if(!blocked(nx,cpu.z,.5))cpu.x=nx;
+  if(!blocked(cpu.x,nz,.5))cpu.z=nz;
+
+  cpu.mesh.position.set(cpu.x,cpu.y,cpu.z);
+  cpu.mesh.rotation.y=Math.atan2(ux,uz);
+
+  cpu.pulseCooldown-=dt;
+  if(playerDist<18&&cpu.pulseCooldown<=0){
+    // CPU sends a harmless tagging pulse toward the player.
+    firePulse(false);
+    cpu.pulseCooldown=1.15;
+  }
 }
 
-// Collect crystals
-function collect(){
- for(const c of crystals){
-  if(c.taken)continue;
-  const pd=Math.hypot(player.x-c.x,player.z-c.z);
-  if(pd<1.15&&Math.abs(player.y-c.y)<3.4){
-   c.taken=true;c.mesh.visible=false;c.light.visible=false;
-   player.score++;updateHUD();
-   if(player.score>=10)endGame(true);
+function collectCrystals(){
+  for(const c of crystals){
+    if(c.taken)continue;
+
+    const pd=Math.hypot(player.x-c.x,player.z-c.z);
+    if(pd<1.15&&Math.abs(player.y-c.y)<3.4){
+      c.taken=true;c.mesh.visible=false;c.light.visible=false;
+      player.score++;
+      updateHUD();
+      if(player.score>=10){endGame(true);return;}
+    }
+
+    const cd=Math.hypot(cpu.x-c.x,cpu.z-c.z);
+    if(!c.taken&&cd<1.2&&Math.abs(cpu.y-c.y)<3.4){
+      c.taken=true;c.mesh.visible=false;c.light.visible=false;
+      cpu.score++;
+      updateHUD();
+      if(cpu.score>=10){endGame(false);return;}
+    }
   }
-  const cd=Math.hypot(cpu.x-c.x,cpu.z-c.z);
-  if(!c.taken&&cd<1.2&&Math.abs(cpu.y-c.y)<3.4){
-   c.taken=true;c.mesh.visible=false;c.light.visible=false;
-   cpu.score++;updateHUD();
-   if(cpu.score>=10)endGame(false);
-  }
- }
 }
 
-// Animated lights and crystal rotation
-const clock=new THREE.Clock();
-function animate(now){
- requestAnimationFrame(animate);
- const dt=Math.min(clock.getDelta(),.04);
- if(running&&!ended){
-  elapsed+=dt;
-  movePlayer(dt);
-  moveCPU(dt);
-  collect();
-  document.getElementById('message').textContent=
-   player.y>1?'高所エリア':'';
- }
- for(const c of crystals){
-  if(c.taken)continue;
-  c.mesh.rotation.y+=dt*1.3;
-  c.mesh.rotation.x+=dt*.5;
-  c.mesh.position.y=c.y+Math.sin(now*.002+c.x)*.16;
-  c.light.position.copy(c.mesh.position);
- }
- renderer.render(scene,camera);
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.04);
+  const now=performance.now();
+
+  if(running&&!ended){
+    movePlayer(dt);
+    moveCPU(dt);
+    collectCrystals();
+
+    player.pulseCooldown-=dt;
+    if(player.pulseCooldown<=0)player.pulseReady=true;
+
+    updateProjectiles(playerProjectiles,dt,true);
+    updateProjectiles(cpuProjectiles,dt,false);
+    updateHUD();
+
+    if(player.y>1){
+      document.getElementById('message').textContent='HIGH GROUND';
+    }else if(document.getElementById('message').textContent==='HIGH GROUND'){
+      document.getElementById('message').textContent='';
+    }
+  }
+
+  for(const c of crystals){
+    if(c.taken)continue;
+    c.mesh.rotation.y+=dt*1.3;
+    c.mesh.rotation.x+=dt*.5;
+    c.mesh.position.y=c.y+Math.sin(now*.002+c.x)*.16;
+    c.light.position.copy(c.mesh.position);
+  }
+
+  renderer.render(scene,camera);
 }
-requestAnimationFrame(animate);
+animate();
 
 addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
 });
 </script>
 </body>
 </html>
+
 
